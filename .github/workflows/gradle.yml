@@ -1,0 +1,35 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: |
+            ./gradlew --parallel -PofficialBuild clean setupCauldron --parallel jar packageBundle
+            cp build/distributions/Thermos*server* $HOME/release/Thermos-1.7.10-1614-server.jar
+            cd build/distributions/
+            unzip Thermos*bundle*zip
+            rm -r bin/unknown
+            mv bin libraries
+            zip -r libraries.zip libraries
+            cp libraries.zip $HOME/release
