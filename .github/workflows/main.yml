@@ -33,7 +33,7 @@ jobs:
       - name: Run a multi-line script
         run: |
           cd forge
-          git checkout c6aa04325e8a80af88755adb2339a402e7e90ebb
+          git checkout
           cd ..
           git pull origin master
           ./gradlew --parallel -PofficialBuild clean setupCauldron --parallel jar packageBundle
