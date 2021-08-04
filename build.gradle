@@ -100,7 +100,7 @@ def gitInfo(String key) {
 }
 ext.mcVersion = "1.7.10"
 ext.forgeVersion = VersionParser.parseForgeRevision(file('src/main/resources/fmlversion.properties'))
-ext.build = System.getenv('BUILD_NUMBER') ? System.getenv('BUILD_NUMBER') : "Unkonwn"
+ext.build = System.getenv('BUILD_NUMBER') ? System.getenv('BUILD_NUMBER') : "Couls"
 ext.kcx_version = 1
 version = "${mcVersion}-${forgeVersion}-${kcx_version}.${build}"
 if (System.getenv('officialBuild')!=null) println "Updated KCauldron version: ${version}"
@@ -116,7 +116,7 @@ configurations {
 }
 
 dependencies {
-    bootstrap 'pw.prok:KBootstrapX:0.2.+'
+    bootstrap files('/C:/Users/nadir/Documents/GitHub/Thermos/libs/KBootstrap-0.3.2.jar')
     libraries 'net.minecraft:launchwrapper:1.12@jar'
     libraries 'org.ow2.asm:asm-all:5.0.3'
     libraries 'com.typesafe.akka:akka-actor_2.11:2.3.3'
@@ -161,16 +161,17 @@ def String repeat(String string, int times) {
     builder as String
 }
 
-def generateClasspath(boolean legacy = false) {
+def generateClasspath(boolean legacy = true) {
     def classpath = ''
     configurations.libraries.resolvedConfiguration.resolvedArtifacts.collect { it.moduleVersion.id }.each {
         def jar = "${it.group.replace('.', '/')}/${it.name}/${it.version}/${it.name}-${it.version}.jar"
         classpath += " ${legacy ? 'libraries/' : repeat('../', (group as String).split('\\.').length + 2)}${jar}"
     }
+    println classpath.trim()
     return classpath.trim()
 }
 
-def generateManifest(boolean legacy = false) {
+def generateManifest(boolean legacy = true) {
     [
             'KCauldronX-Git-Branch'  : gitInfo('branch'),
             'KCauldronX-Git-Hash'    : gitInfo('fullHash'),
