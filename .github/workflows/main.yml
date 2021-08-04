@@ -32,10 +32,6 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
         run: |
-          cd forge
-          git checkout
-          cd ..
-          git pull origin master
           ./gradlew --parallel -PofficialBuild clean setupCauldron --parallel jar packageBundle
           cp build/distributions/Thermos*server* $HOME/release/Thermos-1.7.10-1614-server.jar
           cd build/distributions/
