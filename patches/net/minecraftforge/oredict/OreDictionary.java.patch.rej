@@ -1,0 +1,33 @@
+++++ REJECTED PATCH 4
+         {
+             id = GameData.getItemRegistry().getId(registryName);
+         }
++
++        Set<Integer> set;
++        int count = 0;
+         List<Integer> ids = stackToId.get(id);
+-        if (ids != null) set.addAll(ids);
+-        ids = stackToId.get(id | ((stack.getItemDamage() + 1) << 16));
+-        if (ids != null) set.addAll(ids);
++        if (ids != null) count += ids.size();
++        List<Integer> ids2 = stackToId.get(id | ((stack.getItemDamage() + 1) << 16));
++        if (ids2 != null) count += ids2.size();
++        set = new HashSet<Integer>(count);
+ 
+-        Integer[] tmp = set.toArray(new Integer[set.size()]);
+-        int[] ret = new int[tmp.length];
+-        for (int x = 0; x < tmp.length; x++)
+-            ret[x] = tmp[x];
++        boolean fal = ids != null ? set.addAll(ids): false;
++        fal = ids2 != null ? set.addAll(ids2) : false;
++
++        int[] ret = new int[count];
++        count = 0;
++        for(Iterator<Integer> it = set.iterator(); it.hasNext();)
++        {
++            ret[count++] = it.next();
++        }
+         return ret;
+     }
+ 
+++++ END PATCH

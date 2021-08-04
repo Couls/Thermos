@@ -5,27 +5,18 @@ import thermos.VersionParser
 
 buildscript {
     repositories {
+        mavenLocal()
+        mavenCentral()
         maven {
-            name 'prok'
-            url 'https://repo.prok.pw/'
+            name 'yumc'
+            url 'http://repo.yumc.pw/content/groups/public/'
         }
         maven {
             name 'forge'
             url 'http://files.minecraftforge.net/maven'
         }
-        maven {
-            name 'sonatype'
-            url 'http://oss.sonatype.org/content/repositories/snapshots/'
-        }
-        maven {
-            name 'spigot'
-            url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-        }
-
-        mavenCentral()
     }
     dependencies {
-//        classpath files('FGS.jar')
         classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
     }
 }
@@ -40,14 +31,11 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 repositories {
-    clear()
+    mavenLocal()
+    mavenCentral()
     maven {
-        name 'sonatype'
-        url 'http://oss.sonatype.org/content/repositories/snapshots/'
-    }
-    maven {
-        name 'prok'
-        url 'https://repo.prok.pw/'
+        name 'yumc'
+        url 'http://repo.yumc.pw/content/groups/public/'
     }
     maven {
         name 'forge'
@@ -57,11 +45,6 @@ repositories {
         name 'minecraft'
         url 'https://libraries.minecraft.net/'
     }
-    maven {
-        name 'spigot'
-        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
-
     mavenCentral()
 }
 
@@ -72,19 +55,20 @@ minecraft {
     tweakClass = 'cpw.mods.fml.common.launcher.FMLTweaker'
     installerVersion = "1.4"
     srgExtra "PK: org/bukkit/craftbukkit org/bukkit/craftbukkit/v1_7_R4"
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
 }
-
-group = 'cyberdynecc'
-
+group = 'pw.yumc'
 ext.buildInfoCached = null;
 
 def buildInfo(String key) {
     if (!buildInfoCached) {
         if (project.hasProperty('officialBuild')) {
-            buildInfoCached = new JsonSlurper().parse(new URL("http://i.yive.pw/thermos/version"))
+            buildInfoCached = new JsonSlurper().parse(new URL("https://api.prok.pw/repo/version/${group}/${name}"))
         } else {
             buildInfoCached = [
-                    nextBuildNumber: 'UNOFFICIAL',
+                    nextBuildNumber: '178',
                     version        : 'NONE'
             ]
         }
@@ -114,12 +98,12 @@ def gitInfo(String key) {
     }
     return key ? gitInfoCached[key] : gitInfoCached;
 }
-
 ext.mcVersion = "1.7.10"
 ext.forgeVersion = VersionParser.parseForgeRevision(file('src/main/resources/fmlversion.properties'))
-ext.revision = project.hasProperty('revision') ? project.getProperty('revision') : buildInfo('nextBuildNumber')
-version = "${mcVersion}-${forgeVersion}.${revision}"
-if (project.hasProperty('officialBuild')) println "Updated Thermos version: ${version}"
+ext.build = System.getenv('BUILD_NUMBER') ? System.getenv('BUILD_NUMBER') : "Unkonwn"
+ext.kcx_version = 1
+version = "${mcVersion}-${forgeVersion}-${kcx_version}.${build}"
+if (System.getenv('officialBuild')!=null) println "Updated KCauldron version: ${version}"
 
 launch4j {
     jreMinVersion = '1.7.0'
@@ -132,7 +116,7 @@ configurations {
 }
 
 dependencies {
-    bootstrap 'pw.prok:KBootstrap:0.2.+'
+    bootstrap 'pw.prok:KBootstrapX:0.2.+'
     libraries 'net.minecraft:launchwrapper:1.12@jar'
     libraries 'org.ow2.asm:asm-all:5.0.3'
     libraries 'com.typesafe.akka:akka-actor_2.11:2.3.3'
@@ -153,13 +137,13 @@ dependencies {
     libraries 'org.avaje:ebean:2.7.3'
     libraries 'jline:jline:2.6'
     libraries 'net.md-5:SpecialSource:1.7.4'
-    libraries 'net.sourceforge.argo:argo:2.25'
+    libraries 'net.sourceforge.argo:argo:3.40'
     libraries 'com.googlecode.json-simple:json-simple:1.1'
     libraries 'org.xerial:sqlite-jdbc:3.7.2'
     libraries 'mysql:mysql-connector-java:5.1.14'
     libraries 'javax.persistence:persistence-api:1.0.2'
     libraries 'net.minecraft:server:1.7.10'
-    libraries 'pw.prok:KImagine:0.2.0@jar'
+    libraries files('/C:/Users/nadir/Documents/GitHub/Thermos/libs/KImagine-0.2.0.jar')
     libraries 'org.apache.httpcomponents:httpclient:4.4.1'
     libraries 'net.openhft:affinity:3.0.1'
     libraries 'org.fusesource.jansi:jansi:1.11'
@@ -188,15 +172,16 @@ def generateClasspath(boolean legacy = false) {
 
 def generateManifest(boolean legacy = false) {
     [
-            'Thermos-Git-Branch'    : gitInfo('branch'),
-            'Thermos-Git-Hash'      : gitInfo('fullHash'),
-            'Thermos-Group'         : project.group,
-            'Thermos-Channel'       : project.name,
-            'Thermos-Version'       : project.version,
-            'Thermos-Legacy'        : legacy,
-            'Implementation-Vendor' : 'CyberdyneCC',
+            'KCauldronX-Git-Branch'  : gitInfo('branch'),
+            'KCauldronX-Git-Hash'    : gitInfo('fullHash'),
+            'KCauldronX-Group'       : project.group,
+            'KCauldronX-Channel'     : project.name,
+            'KCauldronX-Version'     : project.version,
+            'KCauldronX-Legacy'      : legacy,
+            'KCauldronX-Official'    : System.getProperty('officialBuild')!=null,
+            'Implementation-Vendor' : 'Prototik',
             'Implementation-Title'  : project.name,
-            'Implementation-Version': project.version,
+            'Implementation-Version': '1.7.10-R0.1-SNAPSHOT',
             'Specification-Vendor'  : 'Bukkit Team',
             'Specification-Title'   : 'Bukkit',
             'Specification-Version' : '1.7.10-R0.1-SNAPSHOT',
@@ -213,10 +198,7 @@ tasks.packageUniversal {
     manifest.attributes(generateManifest(true))
 }
 
-task jar(type: Jar, dependsOn: packageUniversal) {
-    destinationDir file("${buildDir}/distributions")
-    from zipTree(tasks.packageUniversal.archivePath)
-    manifest.attributes(generateManifest())
+task jar(dependsOn: packageUniversal) {
 }
 
 tasks.createChangelog.onlyIf { false }
@@ -224,24 +206,28 @@ tasks.packageInstaller.onlyIf { false }
 
 task packageChangelog(type: CreateChangelog) {
     onlyIf { project.hasProperty('officialBuild') }
+    /*
     classifier = 'changelog'
     extension = 'txt'
-    oldChangelogUrl = "https://i.tcpr.ca/thermos/changelog.txt"
+    oldChangelogUrl = "https://repo.prok.pw/${project.group.replace('.', '/')}/${project.name}/${buildInfo('version')}/${project.name}-${buildInfo('version')}-changelog.txt"
     hash = gitInfo('hash')
     message = gitInfo('message')
     version = project.version
+    */
 }
+
 
 task bundleStub(type: Jar) {
     classifier = 'stub'
     manifest.attributes([
             'Main-Class': 'cpw.mods.fml.relauncher.ServerLaunchWrapper',
-            'Class-Path': "bin/${project.group.replace('.', '/')}/${project.name}/${project.version}/${project.name}-${project.version}.jar"
+            'Class-Path': "libraries/${project.group.replace('.', '/')}/${project.name}/${project.version}/${project.name}-${project.version}.jar"
     ])
 }
 
-task installBundle(type: InstallBundle, dependsOn: jar) {
-    serverJar tasks.jar.archivePath
+
+task installBundle(type: InstallBundle, dependsOn: packageUniversal) {
+    serverJar tasks.packageUniversal.archivePath
     bootstrapClasspath configurations.bootstrap
     bootstrapMain 'pw.prok.bootstrap.Main'
 }
@@ -249,15 +235,15 @@ task installBundle(type: InstallBundle, dependsOn: jar) {
 task packageBundle(type: Zip, dependsOn: installBundle) {
     classifier = 'bundle'
     from fileTree(installBundle.installLocation)
-    from bundleStub
-    rename bundleStub.archiveName, 'Thermos.jar'
+    from packageUniversal
+    // from bundleStub
+    // rename bundleStub.archiveName, 'KCauldron.jar'
 }
 
-task signJars(type: Sign, dependsOn: [packageUniversal, packageChangelog, packageBundle, jar, 'generatePomFileForMavenPublication']) {
-    sign packageUniversal
+task signJars(type: Sign, dependsOn: [packageChangelog, packageBundle, packageUniversal, 'generatePomFileForMavenPublication']) {
     sign packageChangelog
     sign packageBundle
-    sign jar
+    sign packageUniversal
 }
 
 task signPom(type: Sign, dependsOn: 'generatePomFileForMavenPublication') {
@@ -273,18 +259,16 @@ def getPomSignature = {
 
 def getSignatureFiles = {
     def allFiles = project.tasks.signJars.signatureFiles.collect { it }
-    def signedServer = allFiles.find { it.name.contains('-server') }
     def signedChangelog = allFiles.find { it.name.contains('-changelog') }
     def signedBundle = allFiles.find { it.name.contains('-bundle') }
-    def signedJar = (allFiles - [signedServer, signedChangelog, signedBundle])[0]
+    def signedJar = (allFiles - [signedChangelog, signedBundle])[0]
     return [
-            [archive: signedServer, classifier: 'server', extension: 'jar.asc'],
             [archive: signedChangelog, classifier: 'changelog', extension: 'txt.asc'],
             [archive: signedBundle, classifier: 'bundle', extension: 'zip.asc'],
             [archive: signedJar, classifier: null, extension: 'jar.asc']
     ]
 }
-
+/*
 publishing {
     repositories {
         maven {
@@ -296,7 +280,6 @@ publishing {
             }
         }
     }
-
     publications {
         maven(MavenPublication) {
             getSignatureFiles().each { signature ->
@@ -309,42 +292,45 @@ publishing {
                 classifier = null
                 extension = 'pom.asc'
             }
-            artifact packageUniversal
             artifact packageChangelog
             artifact packageBundle
             artifact jar
         }
     }
 }
-
-tasks.generateProjectCauldron << {
-    def file = new File('eclipse/cauldron/build.gradle')
-    file.append('''
-repositories {
-    clear()
-    maven {
-        name 'prok'
-        url 'https://repo.prok.pw/'
-    }
-    maven {
-        name 'forge'
-        url 'http://files.minecraftforge.net/maven'
-    }
-    maven {
-        name 'minecraft'
-        url 'https://libraries.minecraft.net/'
-    }
-    mavenCentral()
-}
-dependencies {
-''')
-    configurations.libraries.resolvedConfiguration.resolvedArtifacts.collect { it.moduleVersion.id }.each { module ->
-        if (['net.minecraft:server:', 'org.ow2.asm:asm-all'].findAll { (module as String).startsWith it }.size() > 0) {
-            return
+*/
+tasks.generateProjectCauldron {
+    doLast {
+        def file = new File('eclipse/cauldron/build.gradle')
+        file.append('''
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name 'yumc'
+            url 'http://repo.yumc.pw/content/groups/public/'
         }
-        file.append("    compile '${module}'\n")
+        maven {
+            name 'forge'
+            url 'http://files.minecraftforge.net/maven'
+        }
+        maven {
+            name 'minecraft'
+            url 'https://libraries.minecraft.net/'
+        }
+        
     }
-    file.append('}')
+    [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+    dependencies {
+    ''')
+        configurations.libraries.resolvedConfiguration.resolvedArtifacts.collect { it.moduleVersion.id }.each { module ->
+            if (['net.minecraft:server:', 'org.ow2.asm:asm-all'].findAll { (module as String).startsWith it }.size() > 0) {
+                return
+            }
+            file.append("    compile '${module}'\n")
+        }
+        file.append('}')
+    }
 }
 
 task resolveAllDependencies {
